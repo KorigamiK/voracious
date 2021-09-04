@@ -37,7 +37,7 @@
     "files": [
       "resources/bin/linux/**"
     ],
-    "target": ["AppImage"]
+    "target": ["AppImage", "deb"]
   },
   "appImage": {
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"

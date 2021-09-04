@@ -1,0 +1,49 @@
+name: Release/Linux, Windows, Mac
+
+on: 
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+      - 'example/**'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: "Install Node.js, NPM and Yarn"
+        uses: actions/setup-node@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          node-version: 14
+
+      - name: Install dependencies & Build release
+        run: |
+          yarn
+          cd app
+          yarn
+          cd ..
+          yarn rebuild-native
+          yarn react-build
+          yarn dist
+
+      - name: Created files
+        run: ls -lrh .
+
+      - name: Upload release
+        uses: xresloader/upload-to-github-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: "*.md;dist/*.exe;LICENSE;dist_electron/*.deb;dist_electron/*.AppImage;dist_electron/*.dmg"
+          tag_name: continuous_releases
+          verbose: false
+          draft: false
